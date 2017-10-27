@@ -149,6 +149,37 @@ func (s *Store) Put(key string, value []byte) error {
 func (s *Store) Delete(key string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+
+	data, err := s.f.readData()
+	if err != nil {
+		return errors.Wrap(err, "impossible to retrieve data")
+	}
+	if len(data) == 0 {
+		return nil
+	}
+
+	decryptedData, err := s.decrypt(data)
+	if err != nil {
+		return errors.Wrap(err, "impossible to retrieve data")
+	}
+
+	hm, err := decodeHmap(decryptedData)
+	if err != nil {
+		return errors.Wrap(err, "cannot decode hmap")
+	}
+
+	hm.delete(key)
+
+	encryptedData, err := s.encrypt(hm.encode())
+	if err != nil {
+		return errors.Wrap(err, "impossible to put data")
+	}
+
+	err = s.f.writeData(encryptedData)
+	if err != nil {
+		return errors.Wrap(err, "impossible to put data")
+	}
+
 	return nil
 }
 
