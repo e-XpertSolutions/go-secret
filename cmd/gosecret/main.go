@@ -47,6 +47,7 @@ func printVersion() {
 // Command line flags.
 var (
 	version        = flag.Bool("version", false, "print version")
+	passphraseFlag = flag.String("passphrase", "", "set the passphrase instead of asking it interactively")
 )
 
 func main() {
@@ -61,13 +62,17 @@ func main() {
 		log.Fatal("invalid number of argument")
 	}
 
-	fmt.Printf("Passphrase: ")
-	passphrase, err := gopass.GetPasswd()
-	if err != nil {
-		log.Fatal("cannot read passphrase")
+	var passphrase string
+	if passphrase = *passphraseFlag; passphrase != "" {
+		fmt.Printf("Passphrase: ")
+		pswd, err := gopass.GetPasswd()
+		if err != nil {
+			log.Fatal("cannot read passphrase")
+		}
+		passphrase = string(pswd)
 	}
 
-	store, err := secret.OpenStore(flag.Arg(0), string(passphrase))
+	store, err := secret.OpenStore(flag.Arg(0), passphrase)
 	if err != nil {
 		log.Fatal("[error] ", err)
 	}
