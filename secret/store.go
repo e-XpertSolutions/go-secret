@@ -8,10 +8,16 @@ import (
 	"github.com/pkg/errors"
 )
 
+// CurrentRevision represents the version of the store format.
+// The value must be incremented for every a change that breaks the
+// compatibility with the existing binary format.
 const CurrentRevision uint16 = 1
 
+// ErrNotFound is returned by Get when the key does not exist in the store.
 var ErrNotFound = errors.New("record not found")
 
+// A Store holds key/value pairs that are securely stored into an encrypted file
+// on disk. The store is safe for concurrent use.
 type Store struct {
 	f   *file
 	rev uint16
@@ -19,6 +25,11 @@ type Store struct {
 	mu  sync.RWMutex
 }
 
+// OpenStore opens an existing store located at the given path and protected
+// with the given passphrase.
+//
+// If the store does not exist, it creates a new one at the path and protected
+// with the passphrase.
 func OpenStore(path, passphrase string) (*Store, error) {
 	if _, err := os.Stat(path); err != nil {
 		if os.IsNotExist(err) {
@@ -78,6 +89,8 @@ func openStore(path, passphrase string) (*Store, error) {
 	}, nil
 }
 
+// Get returns the value in the store for a key. If no value is present,
+// ErrNotFound returned.
 func (s *Store) Get(key string) ([]byte, error) {
 	s.mu.RLock()
 	data, err := s.f.readData()
@@ -103,6 +116,8 @@ func (s *Store) Get(key string) ([]byte, error) {
 	return value, nil
 }
 
+// Put sets the value for a key in the store. The value must not be nil but can
+// be empty.
 func (s *Store) Put(key string, value []byte) error {
 	if value == nil {
 		return errors.New("value is nil")
@@ -146,6 +161,8 @@ func (s *Store) Put(key string, value []byte) error {
 	return nil
 }
 
+// Delete deletes the value for a key in the store. If the key does not exist
+// no error is returned.
 func (s *Store) Delete(key string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -183,6 +200,7 @@ func (s *Store) Delete(key string) error {
 	return nil
 }
 
+// Keys lists all the keys stored in the store.
 func (s *Store) Keys() ([]string, error) {
 	s.mu.RLock()
 	data, err := s.f.readData()
@@ -204,11 +222,16 @@ func (s *Store) Keys() ([]string, error) {
 	return hm.keys(), nil
 }
 
+// Revision returns the current revision of the store.
 func (s *Store) Revision() uint16 {
 	return s.rev
 }
 
+// Close closes the store encrypted file.
 func (s *Store) Close() error {
+	if err := s.f.close(); err != nil {
+		return errors.Wrap(err, "cannot close encrypted file")
+	}
 	return nil
 }
 
