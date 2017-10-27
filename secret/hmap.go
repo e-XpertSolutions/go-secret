@@ -3,7 +3,6 @@ package secret
 import (
 	"bytes"
 	"encoding/base64"
-	"fmt"
 	"regexp"
 
 	"github.com/pkg/errors"
@@ -67,7 +66,7 @@ func (hm *hmap) load(key string) []byte {
 }
 
 func (hm *hmap) delete(key string) {
-	hm.delete(key)
+	delete(hm.m, key)
 }
 
 func (hm *hmap) keys() []string {
@@ -87,7 +86,6 @@ func (hm *hmap) encode() []byte {
 		buf.WriteString(base64.StdEncoding.EncodeToString(v))
 		buf.WriteByte('}')
 	}
-	fmt.Println("=> ", buf.String())
 	return buf.Bytes()
 }
 
