@@ -191,7 +191,7 @@ func (s *Store) Keys() ([]string, error) {
 		return nil, errors.Wrap(err, "impossible to retrieve data")
 	}
 	if len(data) == 0 {
-		return nil, ErrNotFound
+		return []string{}, nil
 	}
 	decryptedData, err := s.decrypt(data)
 	if err != nil {
