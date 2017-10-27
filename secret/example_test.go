@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"e-xpert_solutions/go-secret/secret"
+	"github.com/e-XpertSolutions/go-secret/secret"
 )
 
 func Example() {

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"e-xpert_solutions/go-secret/secret"
+	"github.com/e-XpertSolutions/go-secret/secret"
 
 	"github.com/howeyc/gopass"
 )
