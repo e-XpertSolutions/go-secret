@@ -1,3 +1,4 @@
+// Command gosecret is a tool to manage a secret key/value store.
 package main
 
 import (
