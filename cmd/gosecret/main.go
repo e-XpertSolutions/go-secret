@@ -31,9 +31,31 @@ The global flags are:`)
 	os.Exit(1)
 }
 
+// version
+const (
+	major = "1"
+	minor = "0"
+	patch = "0"
+)
+
+// printVersion prints the current version of the program and then exits.
+func printVersion() {
+	fmt.Printf("gosecret v%s.%s.%s\n", major, minor, patch)
+	os.Exit(0)
+}
+
+// Command line flags.
+var (
+	version        = flag.Bool("version", false, "print version")
+)
+
 func main() {
 	flag.Usage = usage
 	flag.Parse()
+
+	if *version {
+		printVersion()
+	}
 
 	if flag.NArg() < 2 {
 		log.Fatal("invalid number of argument")
