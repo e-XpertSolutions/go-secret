@@ -13,4 +13,6 @@ tags
 *.bak
 *.ignore
 
-
+# binary
+gosecret
+!cmd/gosecret
