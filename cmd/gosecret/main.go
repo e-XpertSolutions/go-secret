@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
 
 	"e-xpert_solutions/go-secret/secret"
@@ -44,6 +43,16 @@ func printVersion() {
 	os.Exit(0)
 }
 
+func fatal(v ...interface{}) {
+	fmt.Fprintln(os.Stderr, v...)
+	os.Exit(1)
+}
+
+func fatalf(format string, v ...interface{}) {
+	fmt.Fprintln(os.Stderr, fmt.Sprintf(format, v...))
+	os.Exit(1)
+}
+
 // Command line flags.
 var (
 	version        = flag.Bool("version", false, "print version")
@@ -59,7 +68,12 @@ func main() {
 	}
 
 	if flag.NArg() < 2 {
-		log.Fatal("invalid number of argument")
+		fatal(`Invalid number of argument:
+
+	Gosecret requires at least the path to the secret store and a command to be
+	executed.
+
+Run 'gosecret --help' for usage.`)
 	}
 
 	var passphrase string
@@ -67,14 +81,14 @@ func main() {
 		fmt.Printf("Passphrase: ")
 		pswd, err := gopass.GetPasswd()
 		if err != nil {
-			log.Fatal("cannot read passphrase")
+			fatal("Cannot read passphrase")
 		}
 		passphrase = string(pswd)
 	}
 
 	store, err := secret.OpenStore(flag.Arg(0), passphrase)
 	if err != nil {
-		log.Fatal("[error] ", err)
+		fatal(err)
 	}
 	defer store.Close()
 
@@ -83,33 +97,35 @@ func main() {
 		var key, value string
 		switch flag.NArg() {
 		case 3:
-			log.Fatal("missing argument")
+			fatal("Missing key and value arguments.\nRun 'gosecret --help' for usage.")
 		case 4:
 			key, value = flag.Arg(2), flag.Arg(3)
 		default:
-			log.Fatal("missing arguments")
+			fatal("'put' command expect key and value arguments.\nRun 'gosecret --help' for usage.")
 		}
 		if err := store.Put(key, []byte(value)); err != nil {
-			log.Fatal("[error] ", err)
+			fatal("error: ", err)
 		}
-		fmt.Println("data successfully added")
+		fmt.Println("Key/Value successfully stored.")
 	case "get":
 		if flag.NArg() != 3 {
-			log.Fatal("missing key")
+			fatal("Missing key argument.\nRun 'gosecret --help' for usage.")
 		}
 		data, err := store.Get(flag.Arg(2))
 		if err != nil {
-			log.Fatal("[error] ", err)
+			fatal(err)
 		}
-		fmt.Println("result: ", string(data))
+		fmt.Println("Value: ", string(data))
 	case "list":
 		keys, err := store.Keys()
 		if err != nil {
-			log.Fatal("[error] ", err)
+			fatal("error: ", err)
 		}
 		fmt.Println("Stored keys: ")
 		for _, k := range keys {
 			fmt.Println("\t-", k)
 		}
+	default:
+		fatalf("Unknown subcommand '%s'.\nRun 'gosecret --help' for usage.", cmd)
 	}
 }
