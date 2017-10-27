@@ -4,13 +4,35 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 
 	"e-xpert_solutions/go-secret/secret"
 
 	"github.com/howeyc/gopass"
 )
 
+func usage() {
+	fmt.Fprint(os.Stderr, "Gosecret is command line tool to manage an encrypted key/value store.\n\n")
+	fmt.Fprint(os.Stderr, "Usage:\n\n\tgosecret [STORE FILE] [COMMAND] [ARGS...]\n\n")
+	fmt.Fprint(os.Stderr, `The commands are:
+
+put    store a new key/value pair in the secret store. This command requires 2
+       arguments: [KEY] [VALUE]. Value can be of any type while the key is
+       limited to alphanumeric, dashes ("-") and underscore ("-") characters.
+get    load a value from the secret store. This command requires 1 additionnal
+       argument: [KEY].
+delete remove a key from the secret store. This command requires 1 additional
+       argument: [KEY].
+list   Display all keys stored in the secret store.
+
+The global flags are:`)
+	fmt.Fprint(os.Stderr, "\n\n")
+	flag.PrintDefaults()
+	os.Exit(1)
+}
+
 func main() {
+	flag.Usage = usage
 	flag.Parse()
 
 	if flag.NArg() < 2 {
