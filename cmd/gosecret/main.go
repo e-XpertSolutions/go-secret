@@ -78,7 +78,7 @@ Run 'gosecret --help' for usage.`)
 	}
 
 	var passphrase string
-	if passphrase = *passphraseFlag; passphrase != "" {
+	if passphrase = *passphraseFlag; passphrase == "" {
 		fmt.Printf("Passphrase: ")
 		pswd, err := gopass.GetPasswd()
 		if err != nil {
